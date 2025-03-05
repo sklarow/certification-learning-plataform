@@ -38,7 +38,7 @@ export default async function EditObjectivePage({ params }: EditObjectivePagePro
       </div>
 
       <div className="bg-white shadow rounded-lg p-6">
-        <ObjectiveForm objective={objective} courseId={objective.courseId} />
+        <ObjectiveForm objective={objective} courseId={objective.course.slug} />
       </div>
     </div>
   )

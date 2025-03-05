@@ -10,7 +10,7 @@ interface NewObjectivePageProps {
 
 export default async function NewObjectivePage({ params }: NewObjectivePageProps) {
   const course = await prisma.course.findUnique({
-    where: { id: params.courseId },
+    where: { slug: params.courseId },
   })
 
   if (!course) {

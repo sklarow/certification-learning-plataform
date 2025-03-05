@@ -19,6 +19,9 @@ interface QuestionFormProps {
     text: string
     options: string
     correctAnswer: string
+    objective: {
+      slug: string
+    }
   }
   objectiveId: string
   courseId: string
@@ -52,7 +55,7 @@ export default function QuestionForm({ question, objectiveId, courseId }: Questi
   const onSubmit = async (data: QuestionFormData) => {
     try {
       if (question) {
-        await fetch(`/api/questions/${question.id}`, {
+        await fetch(`/api/admin/courses/${courseId}/objectives/${objectiveId}/questions/${question.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -63,7 +66,7 @@ export default function QuestionForm({ question, objectiveId, courseId }: Questi
           }),
         })
       } else {
-        await fetch("/api/questions", {
+        await fetch(`/api/admin/courses/${courseId}/objectives/${objectiveId}/questions`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -71,11 +74,11 @@ export default function QuestionForm({ question, objectiveId, courseId }: Questi
           body: JSON.stringify({
             ...data,
             options: JSON.stringify(data.options),
-            objectiveId,
           }),
         })
       }
       router.push(`/admin/courses/${courseId}/objectives/${objectiveId}/questions`)
+      router.refresh()
     } catch (error) {
       console.error("Error saving question:", error)
     }

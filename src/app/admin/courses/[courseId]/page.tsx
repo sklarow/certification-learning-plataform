@@ -10,7 +10,7 @@ interface CourseEditPageProps {
 
 export default async function CourseEditPage({ params }: CourseEditPageProps) {
   const course = await prisma.course.findUnique({
-    where: { id: params.courseId },
+    where: { slug: params.courseId },
   })
 
   if (!course) {

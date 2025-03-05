@@ -22,7 +22,7 @@ export async function PUT(
   try {
     const body = await request.json()
     const course = await prisma.course.update({
-      where: { id: params.courseId },
+      where: { slug: params.courseId },
       data: {
         title: body.title,
         description: body.description,
@@ -49,7 +49,7 @@ export async function DELETE(
 
   try {
     await prisma.course.delete({
-      where: { id: params.courseId },
+      where: { slug: params.courseId },
     })
 
     return new NextResponse(null, { status: 204 })

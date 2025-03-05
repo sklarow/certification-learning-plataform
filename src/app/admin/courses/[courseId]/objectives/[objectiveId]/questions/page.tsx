@@ -2,6 +2,13 @@ import { prisma } from "@/lib/prisma/client"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+interface Question {
+  id: string
+  text: string
+  options: string
+  correctAnswer: string
+}
+
 interface QuestionsPageProps {
   params: {
     courseId: string
@@ -11,7 +18,12 @@ interface QuestionsPageProps {
 
 export default async function QuestionsPage({ params }: QuestionsPageProps) {
   const objective = await prisma.objective.findUnique({
-    where: { id: params.objectiveId },
+    where: { 
+      slug: params.objectiveId,
+      course: {
+        slug: params.courseId
+      }
+    },
     include: {
       course: true,
       questions: true,
@@ -34,7 +46,7 @@ export default async function QuestionsPage({ params }: QuestionsPageProps) {
           </p>
         </div>
         <Link
-          href={`/admin/courses/${params.courseId}/objectives/${params.objectiveId}/questions/new`}
+          href={`/admin/courses/${objective.course.slug}/objectives/${objective.slug}/questions/new`}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
         >
           Add Question
@@ -43,7 +55,7 @@ export default async function QuestionsPage({ params }: QuestionsPageProps) {
 
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
-          {objective.questions.map((question, index) => (
+          {objective.questions.map((question: Question, index: number) => (
             <li key={question.id}>
               <div className="px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between">
@@ -65,7 +77,7 @@ export default async function QuestionsPage({ params }: QuestionsPageProps) {
                   </div>
                   <div className="flex space-x-4">
                     <Link
-                      href={`/admin/courses/${params.courseId}/objectives/${params.objectiveId}/questions/${question.id}`}
+                      href={`/admin/courses/${objective.course.slug}/objectives/${objective.slug}/questions/${question.id}`}
                       className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
                     >
                       Edit

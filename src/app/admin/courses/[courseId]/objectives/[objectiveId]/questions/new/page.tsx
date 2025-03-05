@@ -14,7 +14,10 @@ export default async function NewQuestionPage({ params }: NewQuestionPageProps) 
 
   const objective = await prisma.objective.findUnique({
     where: {
-      id: objectiveId,
+      slug: objectiveId,
+      course: {
+        slug: courseId
+      }
     },
     include: {
       course: true,
@@ -35,7 +38,7 @@ export default async function NewQuestionPage({ params }: NewQuestionPageProps) 
           </h2>
           <p className="text-gray-600">{objective.title}</p>
         </div>
-        <QuestionForm objectiveId={objectiveId} courseId={courseId} />
+        <QuestionForm objectiveId={objective.slug} courseId={objective.course.slug} />
       </div>
     </div>
   );
