@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { RichTextEditor } from "@/components/learning/RichTextEditor"
+import { useCallback } from "react"
 
 const objectiveSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -50,25 +51,50 @@ export function ObjectiveForm({ objective, courseId }: ObjectiveFormProps) {
   })
 
   const description = watch("description")
+  const title = watch("title")
+
+  const generateSlug = useCallback((title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+  }, [])
 
   const onSubmit = async (data: ObjectiveFormData) => {
     try {
+      const slug = generateSlug(data.title)
+      const formData = {
+        ...data,
+        slug,
+        description: data.description || "",
+      }
+
       if (objective) {
-        await fetch(`/api/admin/courses/${courseId}/objectives/${objective.id}`, {
+        const response = await fetch(`/api/admin/courses/${courseId}/objectives/${objective.slug}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(formData),
         })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to update objective: ${response.statusText} - ${errorText}`)
+        }
       } else {
-        await fetch(`/api/admin/courses/${courseId}/objectives`, {
+        const response = await fetch(`/api/admin/courses/${courseId}/objectives`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(formData),
         })
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Failed to create objective: ${response.statusText} - ${errorText}`)
+        }
       }
       router.push(`/admin/courses/${courseId}/objectives`)
       router.refresh()
@@ -106,8 +132,14 @@ export function ObjectiveForm({ objective, courseId }: ObjectiveFormProps) {
         </label>
         <div className="mt-1">
           <RichTextEditor
-            value={description}
-            onChange={(value) => setValue("description", value)}
+            value={description || ""}
+            onChange={(value) => {
+              setValue("description", value, { 
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true 
+              })
+            }}
             placeholder="Enter objective description..."
           />
         </div>
