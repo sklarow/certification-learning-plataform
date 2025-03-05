@@ -1,5 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import { Session } from "next-auth"
+import { signIn, signOut } from "next-auth/react"
 
 interface NavbarProps {
   session: Session | null
@@ -37,20 +40,20 @@ export function Navbar({ session }: NavbarProps) {
                 <span className="text-sm text-gray-700">
                   {session.user.name}
                 </span>
-                <Link
-                  href="/api/auth/signout"
+                <button
+                  onClick={() => signOut()}
                   className="text-sm text-gray-700 hover:text-gray-900"
                 >
                   Sign out
-                </Link>
+                </button>
               </div>
             ) : (
-              <Link
-                href="/api/auth/signin"
+              <button
+                onClick={() => signIn("google", { callbackUrl: "/courses" })}
                 className="text-sm text-gray-700 hover:text-gray-900"
               >
                 Sign in
-              </Link>
+              </button>
             )}
           </div>
         </div>

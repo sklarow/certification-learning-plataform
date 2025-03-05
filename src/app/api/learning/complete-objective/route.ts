@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma/client"
+import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth/auth.config"
+import { authOptions } from "@/lib/auth"
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions)
@@ -12,18 +12,19 @@ export async function POST(request: Request) {
 
   try {
     const { objectiveId, courseId } = await request.json()
+    console.log('Completing objective:', { userId: session.user.id, objectiveId }) // Debug log
 
     // Create or update the user's progress for this objective
-    await prisma.progress.upsert({
+    const progress = await prisma.progress.upsert({
       where: {
         userId_objectiveId: {
           userId: session.user.id,
-          objectiveId,
+          objectiveId: objectiveId,
         },
       },
       create: {
         userId: session.user.id,
-        objectiveId,
+        objectiveId: objectiveId,
         completed: true,
       },
       update: {
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
       },
     })
 
+    console.log('Progress updated:', progress) // Debug log
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error("Error completing objective:", error)

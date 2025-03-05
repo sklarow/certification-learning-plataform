@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma/client"
+import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth/auth.config"
+import { authOptions } from "@/lib/auth"
 
 interface CoursePageProps {
   params: {
@@ -38,9 +38,13 @@ export default async function CoursePage({ params }: CoursePageProps) {
       })
     : []
 
-  const completedObjectiveIds = new Set(userProgress.map((p: { objectiveId: string }) => p.objectiveId))
+  console.log('User Progress:', userProgress) // Debug log
+  const completedObjectiveIds = new Set(userProgress.map((p) => p.objectiveId))
+  console.log('Completed Objective IDs:', Array.from(completedObjectiveIds)) // Debug log
+  console.log('Course Objectives:', course.objectives.map(obj => ({ id: obj.id, completed: completedObjectiveIds.has(obj.id) }))) // Debug log
+
   const totalObjectives = course.objectives.length
-  const completedObjectives = course.objectives.filter((obj: { id: string }) => completedObjectiveIds.has(obj.id)).length
+  const completedObjectives = course.objectives.filter((obj) => completedObjectiveIds.has(obj.id)).length
   const progressPercentage = totalObjectives > 0 ? (completedObjectives / totalObjectives) * 100 : 0
 
   return (
