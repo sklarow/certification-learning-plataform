@@ -97,7 +97,14 @@ export function ObjectiveQuestions({ questions, objectiveId, courseId }: Objecti
         })
 
         if (!completeResponse.ok) {
-          throw new Error(`Failed to complete objective: ${completeResponse.statusText}`)
+          const errorText = await completeResponse.text()
+          console.error('Failed to complete objective:', { 
+            status: completeResponse.status, 
+            statusText: completeResponse.statusText, 
+            errorBody: errorText,
+            requestData: { objectiveId, courseId }
+          })
+          throw new Error(`Failed to complete objective: ${completeResponse.statusText} - ${errorText}`)
         }
 
         triggerConfetti()
