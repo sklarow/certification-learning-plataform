@@ -1,7 +1,18 @@
 import { prisma } from "@/lib/prisma/client"
 import Link from "next/link"
 import { ObjectiveQuestions } from "@/components/learning/ObjectiveQuestions"
-import { Objective } from "@prisma/client"
+
+interface Objective {
+  id: string
+  title: string
+  slug: string
+  description: string
+  order: number
+  courseId: string
+  course: {
+    slug: string
+  }
+}
 
 export default async function ObjectivePage({
   params,
@@ -55,15 +66,23 @@ export default async function ObjectivePage({
         />
       </div>
 
-      <div className="flex justify-between mt-8">
-        {prevObjective && (
+      <div className="flex justify-between items-center mt-8">
+        <div className="flex space-x-4">
+          {prevObjective && (
+            <Link
+              href={`/courses/${objective.course.slug}/objectives/${prevObjective.slug}`}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              ← Previous Objective
+            </Link>
+          )}
           <Link
-            href={`/courses/${objective.course.slug}/objectives/${prevObjective.slug}`}
+            href={`/courses/${objective.course.slug}`}
             className="text-blue-600 hover:text-blue-800"
           >
-            ← Previous Objective
+            ← Back to Course
           </Link>
-        )}
+        </div>
         {nextObjective && (
           <Link
             href={`/courses/${objective.course.slug}/objectives/${nextObjective.slug}`}
