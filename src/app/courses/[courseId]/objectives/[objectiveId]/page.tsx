@@ -46,7 +46,7 @@ export default async function ObjectivePage({
     },
   })
 
-  const currentIndex = allObjectives.findIndex((o: Objective) => o.id === objective.id)
+  const currentIndex = allObjectives.findIndex((o) => o.id === objective.id)
   const prevObjective = currentIndex > 0 ? allObjectives[currentIndex - 1] : null
   const nextObjective =
     currentIndex < allObjectives.length - 1 ? allObjectives[currentIndex + 1] : null
@@ -56,7 +56,7 @@ export default async function ObjectivePage({
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{objective.title}</h1>
         <div 
-          className="text-gray-600 prose prose-sm sm:prose lg:prose-lg max-w-none"
+          className="prose prose-lg max-w-none [&>h1]:text-4xl [&>h2]:text-3xl [&>h3]:text-2xl [&>h4]:text-xl [&>h5]:text-lg [&>h6]:text-base [&>p]:text-base [&>ul]:list-disc [&>ol]:list-decimal [&>li]:text-base [&>a]:text-blue-600 [&>a:hover]:text-blue-800 [&>img]:max-w-full [&>img]:rounded-lg [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic"
           dangerouslySetInnerHTML={{ __html: objective.description }}
         />
       </div>
@@ -73,7 +73,7 @@ export default async function ObjectivePage({
         <div className="flex-1">
           {prevObjective && (
             <Link
-              href={`/courses/${objective.course.slug}/objectives/${prevObjective.slug}`}
+              href={`/courses/${params.courseId}/objectives/${prevObjective.slug}`}
               className="text-blue-600 hover:text-blue-800"
             >
               ← Previous Objective
@@ -82,7 +82,7 @@ export default async function ObjectivePage({
         </div>
         <div className="flex-1 text-center">
           <Link
-            href={`/courses/${objective.course.slug}`}
+            href={`/courses/${params.courseId}`}
             className="text-blue-600 hover:text-blue-800"
           >
             Back to Course
@@ -91,7 +91,7 @@ export default async function ObjectivePage({
         <div className="flex-1 text-right">
           {nextObjective && (
             <Link
-              href={`/courses/${objective.course.slug}/objectives/${nextObjective.slug}`}
+              href={`/courses/${params.courseId}/objectives/${nextObjective.slug}`}
               className="text-blue-600 hover:text-blue-800"
             >
               Next Objective →
