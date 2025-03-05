@@ -55,7 +55,10 @@ export default async function ObjectivePage({
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{objective.title}</h1>
-        <p className="text-gray-600">{objective.description}</p>
+        <div 
+          className="text-gray-600 prose prose-sm sm:prose lg:prose-lg max-w-none"
+          dangerouslySetInnerHTML={{ __html: objective.description }}
+        />
       </div>
 
       <div className="mb-8">

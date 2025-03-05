@@ -3,8 +3,8 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Objective } from "@prisma/client"
 import { useRouter } from "next/navigation"
+import { RichTextEditor } from "@/components/learning/RichTextEditor"
 
 const objectiveSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -15,42 +15,59 @@ const objectiveSchema = z.object({
 type ObjectiveFormData = z.infer<typeof objectiveSchema>
 
 interface ObjectiveFormProps {
-  objective?: Objective
+  objective?: {
+    id: string
+    title: string
+    description: string
+    order: number
+    slug: string
+  }
   courseId: string
 }
 
 export function ObjectiveForm({ objective, courseId }: ObjectiveFormProps) {
   const router = useRouter()
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<ObjectiveFormData>({
     resolver: zodResolver(objectiveSchema),
-    defaultValues: objective,
+    defaultValues: objective
+      ? {
+          title: objective.title,
+          description: objective.description,
+          order: objective.order,
+        }
+      : {
+          title: "",
+          description: "",
+          order: 0,
+        },
   })
+
+  const description = watch("description")
 
   const onSubmit = async (data: ObjectiveFormData) => {
     try {
       if (objective) {
-        // Update existing objective
         await fetch(`/api/admin/courses/${courseId}/objectives/${objective.id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...data,
-            slug: data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         })
       } else {
-        // Create new objective
         await fetch(`/api/admin/courses/${courseId}/objectives`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...data,
-            slug: data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         })
       }
       router.push(`/admin/courses/${courseId}/objectives`)
@@ -87,12 +104,13 @@ export function ObjectiveForm({ objective, courseId }: ObjectiveFormProps) {
         >
           Description
         </label>
-        <textarea
-          id="description"
-          rows={4}
-          {...register("description")}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-        />
+        <div className="mt-1">
+          <RichTextEditor
+            value={description}
+            onChange={(value) => setValue("description", value)}
+            placeholder="Enter objective description..."
+          />
+        </div>
         {errors.description && (
           <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
         )}
@@ -119,14 +137,16 @@ export function ObjectiveForm({ objective, courseId }: ObjectiveFormProps) {
       <div className="flex justify-end space-x-3">
         <button
           type="button"
-          onClick={() => router.push(`/admin/courses/${courseId}/objectives`)}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          onClick={() =>
+            router.push(`/admin/courses/${courseId}/objectives`)
+          }
+          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+          className="rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
           {objective ? "Update Objective" : "Create Objective"}
         </button>
