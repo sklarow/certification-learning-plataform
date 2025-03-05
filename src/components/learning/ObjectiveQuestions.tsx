@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Question } from "@prisma/client"
+import confetti from "canvas-confetti"
 
 interface ObjectiveQuestionsProps {
   questions: Question[]
@@ -23,6 +24,21 @@ export function ObjectiveQuestions({ questions, objectiveId, courseId }: Objecti
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
+      if (questions.length === 0) {
+        // If no questions, just mark as complete
+        await fetch("/api/learning/complete-objective", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            objectiveId,
+            courseId,
+          }),
+        })
+        setIsComplete(true)
+        triggerConfetti()
+        return
+      }
+
       const response = await fetch("/api/learning/check-answers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,12 +65,21 @@ export function ObjectiveQuestions({ questions, objectiveId, courseId }: Objecti
             courseId,
           }),
         })
+        triggerConfetti()
       }
     } catch (error) {
       console.error("Error checking answers:", error)
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    })
   }
 
   return (
@@ -100,10 +125,14 @@ export function ObjectiveQuestions({ questions, objectiveId, courseId }: Objecti
         <div className="flex justify-end">
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || Object.keys(answers).length !== questions.length}
+            disabled={isSubmitting || (questions.length > 0 && Object.keys(answers).length !== questions.length)}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? "Checking answers..." : "Submit Answers"}
+            {isSubmitting 
+              ? "Processing..." 
+              : questions.length === 0 
+                ? "Mark as completed" 
+                : "Submit Answers"}
           </button>
         </div>
       )}

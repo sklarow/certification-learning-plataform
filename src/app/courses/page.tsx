@@ -1,55 +1,83 @@
 import { prisma } from "@/lib/prisma/client"
 import Link from "next/link"
-import { Course, Objective } from "@prisma/client"
-
-interface CourseWithObjectives extends Course {
-  objectives: Objective[]
-}
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth/auth.config"
 
 export default async function CoursesPage() {
+  const session = await getServerSession(authOptions)
   const courses = await prisma.course.findMany({
     include: {
-      objectives: true,
+      objectives: {
+        orderBy: {
+          order: "asc",
+        },
+      },
     },
   })
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-          Available Courses
-        </h1>
-        <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
-          Choose a course to start learning
-        </p>
-      </div>
+  // Get user's progress for all objectives
+  const userProgress = session?.user
+    ? await prisma.progress.findMany({
+        where: {
+          userId: session.user.id,
+          completed: true,
+        },
+        select: {
+          objectiveId: true,
+        },
+      })
+    : []
 
-      <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {courses.map((course: CourseWithObjectives) => (
+  const completedObjectiveIds = new Set(userProgress.map(p => p.objectiveId))
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Available Courses</h1>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {courses.map((course) => (
           <div
             key={course.id}
-            className="bg-white overflow-hidden shadow rounded-lg"
+            className="bg-white rounded-lg shadow-md overflow-hidden"
           >
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900">
-                {course.title}
-              </h3>
-              <p className="mt-2 text-sm text-gray-500">
-                {course.description}
-              </p>
-              <div className="mt-4">
-                <span className="text-sm text-gray-500">
-                  {course.objectives.length} learning objectives
-                </span>
+            <div className="p-6">
+              <h2 className="text-xl font-semibold mb-2">{course.title}</h2>
+              <p className="text-gray-600 mb-4">{course.description}</p>
+              <div className="space-y-4">
+                {course.objectives.map((objective) => (
+                  <div
+                    key={objective.id}
+                    className="flex items-center justify-between border rounded-lg p-3"
+                  >
+                    <div className="flex items-center space-x-2">
+                      {completedObjectiveIds.has(objective.id) && (
+                        <svg
+                          className="h-5 w-5 text-green-500"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                      <span className="text-sm font-medium">
+                        {objective.title}
+                        {completedObjectiveIds.has(objective.id) && (
+                          <span className="ml-2 text-xs text-green-500">(completed)</span>
+                        )}
+                      </span>
+                    </div>
+                    <Link
+                      href={`/courses/${course.slug}/objectives/${objective.slug}`}
+                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      Practice Objective
+                    </Link>
+                  </div>
+                ))}
               </div>
-            </div>
-            <div className="bg-gray-50 px-4 py-4 sm:px-6">
-              <Link
-                href={`/courses/${course.slug}`}
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                Start learning
-              </Link>
             </div>
           </div>
         ))}
