@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     const { objectiveId, courseId } = await request.json()
 
     // Create or update the user's progress for this objective
-    await prisma.userProgress.upsert({
+    await prisma.progress.upsert({
       where: {
         userId_objectiveId: {
           userId: session.user.id,
@@ -25,11 +25,9 @@ export async function POST(request: Request) {
         userId: session.user.id,
         objectiveId,
         completed: true,
-        completedAt: new Date(),
       },
       update: {
         completed: true,
-        completedAt: new Date(),
       },
     })
 
