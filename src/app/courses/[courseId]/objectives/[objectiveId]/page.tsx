@@ -66,8 +66,8 @@ export default async function ObjectivePage({
         />
       </div>
 
-      <div className="flex justify-between items-center mt-8">
-        <div className="flex space-x-4">
+      <div className="flex items-center mt-8">
+        <div className="flex-1">
           {prevObjective && (
             <Link
               href={`/courses/${objective.course.slug}/objectives/${prevObjective.slug}`}
@@ -76,21 +76,25 @@ export default async function ObjectivePage({
               ← Previous Objective
             </Link>
           )}
+        </div>
+        <div className="flex-1 text-center">
           <Link
             href={`/courses/${objective.course.slug}`}
             className="text-blue-600 hover:text-blue-800"
           >
-            ← Back to Course
+            Back to Course
           </Link>
         </div>
-        {nextObjective && (
-          <Link
-            href={`/courses/${objective.course.slug}/objectives/${nextObjective.slug}`}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            Next Objective →
-          </Link>
-        )}
+        <div className="flex-1 text-right">
+          {nextObjective && (
+            <Link
+              href={`/courses/${objective.course.slug}/objectives/${nextObjective.slug}`}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              Next Objective →
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   )
