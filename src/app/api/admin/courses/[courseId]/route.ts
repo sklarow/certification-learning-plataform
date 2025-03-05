@@ -26,6 +26,7 @@ export async function PUT(
       data: {
         title: body.title,
         description: body.description,
+        slug: body.slug,
       },
     })
 

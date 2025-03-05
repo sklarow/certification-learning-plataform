@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma/client"
 import Link from "next/link"
+import { Course, Objective } from "@prisma/client"
+
+interface CourseWithObjectives extends Course {
+  objectives: Objective[]
+}
 
 export default async function CoursesPage() {
   const courses = await prisma.course.findMany({
@@ -20,7 +25,7 @@ export default async function CoursesPage() {
       </div>
 
       <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {courses.map((course) => (
+        {courses.map((course: CourseWithObjectives) => (
           <div
             key={course.id}
             className="bg-white overflow-hidden shadow rounded-lg"
@@ -40,7 +45,7 @@ export default async function CoursesPage() {
             </div>
             <div className="bg-gray-50 px-4 py-4 sm:px-6">
               <Link
-                href={`/courses/${course.id}`}
+                href={`/courses/${course.slug}`}
                 className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
               >
                 Start learning

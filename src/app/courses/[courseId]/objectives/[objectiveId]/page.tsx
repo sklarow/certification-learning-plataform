@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma/client"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { Question } from "@prisma/client"
 
 interface ObjectivePageProps {
   params: {
@@ -11,7 +12,12 @@ interface ObjectivePageProps {
 
 export default async function ObjectivePage({ params }: ObjectivePageProps) {
   const objective = await prisma.objective.findUnique({
-    where: { id: params.objectiveId },
+    where: { 
+      slug: params.objectiveId,
+      course: {
+        slug: params.courseId
+      }
+    },
     include: {
       course: true,
       questions: true,
@@ -26,14 +32,14 @@ export default async function ObjectivePage({ params }: ObjectivePageProps) {
   const [previousObjective, nextObjective] = await Promise.all([
     prisma.objective.findFirst({
       where: {
-        courseId: params.courseId,
+        courseId: objective.courseId,
         order: { lt: objective.order },
       },
       orderBy: { order: "desc" },
     }),
     prisma.objective.findFirst({
       where: {
-        courseId: params.courseId,
+        courseId: objective.courseId,
         order: { gt: objective.order },
       },
       orderBy: { order: "asc" },
@@ -44,7 +50,7 @@ export default async function ObjectivePage({ params }: ObjectivePageProps) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-8">
         <Link
-          href={`/courses/${params.courseId}`}
+          href={`/courses/${objective.course.slug}`}
           className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
         >
           ← Back to course
@@ -64,7 +70,7 @@ export default async function ObjectivePage({ params }: ObjectivePageProps) {
             Practice Questions
           </h2>
           <div className="space-y-4">
-            {objective.questions.map((question, index) => (
+            {objective.questions.map((question: Question, index: number) => (
               <div
                 key={question.id}
                 className="border rounded-lg p-4"
@@ -97,7 +103,7 @@ export default async function ObjectivePage({ params }: ObjectivePageProps) {
         <div className="mt-8 flex justify-between">
           {previousObjective && (
             <Link
-              href={`/courses/${params.courseId}/objectives/${previousObjective.id}`}
+              href={`/courses/${objective.course.slug}/objectives/${previousObjective.slug}`}
               className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
             >
               ← Previous objective
@@ -105,7 +111,7 @@ export default async function ObjectivePage({ params }: ObjectivePageProps) {
           )}
           {nextObjective && (
             <Link
-              href={`/courses/${params.courseId}/objectives/${nextObjective.id}`}
+              href={`/courses/${objective.course.slug}/objectives/${nextObjective.slug}`}
               className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
             >
               Next objective →

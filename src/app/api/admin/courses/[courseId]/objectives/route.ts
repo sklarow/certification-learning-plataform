@@ -21,12 +21,21 @@ export async function POST(
 
   try {
     const body = await request.json()
+    const course = await prisma.course.findUnique({
+      where: { slug: params.courseId },
+    })
+
+    if (!course) {
+      return new NextResponse("Course not found", { status: 404 })
+    }
+
     const objective = await prisma.objective.create({
       data: {
         title: body.title,
         description: body.description,
         order: body.order,
-        courseId: params.courseId,
+        slug: body.slug,
+        courseId: course.id,
       },
     })
 

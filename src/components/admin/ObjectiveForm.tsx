@@ -37,14 +37,20 @@ export function ObjectiveForm({ objective, courseId }: ObjectiveFormProps) {
         await fetch(`/api/admin/courses/${courseId}/objectives/${objective.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            ...data,
+            slug: data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+          }),
         })
       } else {
         // Create new objective
         await fetch(`/api/admin/courses/${courseId}/objectives`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            ...data,
+            slug: data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+          }),
         })
       }
       router.push(`/admin/courses/${courseId}/objectives`)

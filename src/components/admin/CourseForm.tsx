@@ -28,6 +28,15 @@ export function CourseForm({ course }: CourseFormProps) {
     defaultValues: course,
   })
 
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+  }
+
   const onSubmit = async (data: CourseFormData) => {
     try {
       if (course) {
@@ -35,14 +44,20 @@ export function CourseForm({ course }: CourseFormProps) {
         await fetch(`/api/admin/courses/${course.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            ...data,
+            slug: generateSlug(data.title),
+          }),
         })
       } else {
         // Create new course
         await fetch("/api/admin/courses", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            ...data,
+            slug: generateSlug(data.title),
+          }),
         })
       }
       router.push("/admin")

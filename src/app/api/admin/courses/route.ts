@@ -16,6 +16,7 @@ export async function POST(request: Request) {
       data: {
         title: body.title,
         description: body.description,
+        slug: body.slug,
       },
     })
 

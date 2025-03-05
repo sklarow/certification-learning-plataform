@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma/client"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { Objective } from "@prisma/client"
 
 interface CoursePageProps {
   params: {
@@ -10,7 +11,7 @@ interface CoursePageProps {
 
 export default async function CoursePage({ params }: CoursePageProps) {
   const course = await prisma.course.findUnique({
-    where: { id: params.courseId },
+    where: { slug: params.courseId },
     include: {
       objectives: {
         orderBy: { order: "asc" },
@@ -38,7 +39,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
           Learning Objectives
         </h2>
         <div className="space-y-6">
-          {course.objectives.map((objective, index) => (
+          {course.objectives.map((objective: Objective, index: number) => (
             <div
               key={objective.id}
               className="bg-white shadow rounded-lg p-6"
@@ -48,7 +49,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                   {index + 1}. {objective.title}
                 </h3>
                 <Link
-                  href={`/courses/${course.id}/objectives/${objective.id}`}
+                  href={`/courses/${course.slug}/objectives/${objective.slug}`}
                   className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
                 >
                   Start learning

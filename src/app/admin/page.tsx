@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma/client"
 import Link from "next/link"
+import { Course, Objective } from "@prisma/client"
+
+interface CourseWithObjectives extends Course {
+  objectives: Objective[]
+}
 
 export default async function AdminDashboard() {
   const courses = await prisma.course.findMany({
@@ -11,20 +16,25 @@ export default async function AdminDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900">
-          Admin Dashboard
-        </h1>
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-900">
+            Admin Dashboard
+          </h1>
+          <p className="mt-2 text-sm text-gray-700">
+            Manage your courses and learning objectives
+          </p>
+        </div>
         <Link
           href="/admin/courses/new"
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
         >
-          Create New Course
+          Add Course
         </Link>
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
-          {courses.map((course) => (
+          {courses.map((course: CourseWithObjectives) => (
             <li key={course.id}>
               <div className="px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between">
@@ -38,13 +48,13 @@ export default async function AdminDashboard() {
                   </div>
                   <div className="flex space-x-4">
                     <Link
-                      href={`/admin/courses/${course.id}`}
+                      href={`/admin/courses/${course.slug}`}
                       className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
                     >
                       Edit
                     </Link>
                     <Link
-                      href={`/admin/courses/${course.id}/objectives`}
+                      href={`/admin/courses/${course.slug}/objectives`}
                       className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
                     >
                       Manage Objectives

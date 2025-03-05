@@ -61,6 +61,7 @@ model VerificationToken {
 model Course {
   id          String   @id @default(cuid())
   title       String
+  slug        String   @unique
   description String?
   objectives  Objective[]
   createdAt   DateTime @default(now())
@@ -70,6 +71,7 @@ model Course {
 model Objective {
   id          String   @id @default(cuid())
   title       String
+  slug        String   @unique
   description String
   order       Int
   courseId    String

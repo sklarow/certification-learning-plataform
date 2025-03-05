@@ -11,7 +11,12 @@ interface EditObjectivePageProps {
 
 export default async function EditObjectivePage({ params }: EditObjectivePageProps) {
   const objective = await prisma.objective.findUnique({
-    where: { id: params.objectiveId },
+    where: { 
+      slug: params.objectiveId,
+      course: {
+        slug: params.courseId
+      }
+    },
     include: {
       course: true,
     },
@@ -33,7 +38,7 @@ export default async function EditObjectivePage({ params }: EditObjectivePagePro
       </div>
 
       <div className="bg-white shadow rounded-lg p-6">
-        <ObjectiveForm objective={objective} courseId={params.courseId} />
+        <ObjectiveForm objective={objective} courseId={objective.courseId} />
       </div>
     </div>
   )
