@@ -1,123 +1,77 @@
 import { prisma } from "@/lib/prisma/client"
 import Link from "next/link"
-import { notFound } from "next/navigation"
-import { Question } from "@prisma/client"
+import { ObjectiveQuestions } from "@/components/learning/ObjectiveQuestions"
+import { Objective } from "@prisma/client"
 
-interface ObjectivePageProps {
-  params: {
-    courseId: string
-    objectiveId: string
-  }
-}
-
-export default async function ObjectivePage({ params }: ObjectivePageProps) {
+export default async function ObjectivePage({
+  params,
+}: {
+  params: { courseId: string; objectiveId: string }
+}) {
   const objective = await prisma.objective.findUnique({
-    where: { 
+    where: {
       slug: params.objectiveId,
       course: {
         slug: params.courseId
       }
     },
     include: {
-      course: true,
       questions: true,
+      course: true,
     },
   })
 
   if (!objective) {
-    notFound()
+    return <div>Objective not found</div>
   }
 
-  // Get previous and next objectives
-  const [previousObjective, nextObjective] = await Promise.all([
-    prisma.objective.findFirst({
-      where: {
-        courseId: objective.courseId,
-        order: { lt: objective.order },
-      },
-      orderBy: { order: "desc" },
-    }),
-    prisma.objective.findFirst({
-      where: {
-        courseId: objective.courseId,
-        order: { gt: objective.order },
-      },
-      orderBy: { order: "asc" },
-    }),
-  ])
+  // Get all objectives for this course to handle navigation
+  const allObjectives = await prisma.objective.findMany({
+    where: {
+      courseId: objective.courseId,
+    },
+    orderBy: {
+      order: "asc",
+    },
+  })
+
+  const currentIndex = allObjectives.findIndex((o: Objective) => o.id === objective.id)
+  const prevObjective = currentIndex > 0 ? allObjectives[currentIndex - 1] : null
+  const nextObjective =
+    currentIndex < allObjectives.length - 1 ? allObjectives[currentIndex + 1] : null
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <Link
-          href={`/courses/${objective.course.slug}`}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-        >
-          ← Back to course
-        </Link>
+        <h1 className="text-3xl font-bold mb-2">{objective.title}</h1>
+        <p className="text-gray-600">{objective.description}</p>
       </div>
 
-      <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-3xl font-extrabold text-gray-900">
-          {objective.title}
-        </h1>
-        <p className="mt-4 text-lg text-gray-500">
-          {objective.description}
-        </p>
+      <div className="mb-8">
+        <ObjectiveQuestions
+          objectiveId={objective.id}
+          courseId={objective.courseId}
+          questions={objective.questions}
+        />
+      </div>
 
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Practice Questions
-          </h2>
-          <div className="space-y-4">
-            {objective.questions.map((question: Question, index: number) => (
-              <div
-                key={question.id}
-                className="border rounded-lg p-4"
-              >
-                <p className="font-medium text-gray-900">
-                  {index + 1}. {question.text}
-                </p>
-                <div className="mt-2">
-                  {JSON.parse(question.options).map((option: string, i: number) => (
-                    <div
-                      key={i}
-                      className="flex items-center mt-2"
-                    >
-                      <input
-                        type="radio"
-                        name={`question-${question.id}`}
-                        className="h-4 w-4 text-indigo-600"
-                      />
-                      <label className="ml-3 text-sm text-gray-700">
-                        {option}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-8 flex justify-between">
-          {previousObjective && (
-            <Link
-              href={`/courses/${objective.course.slug}/objectives/${previousObjective.slug}`}
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              ← Previous objective
-            </Link>
-          )}
-          {nextObjective && (
-            <Link
-              href={`/courses/${objective.course.slug}/objectives/${nextObjective.slug}`}
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Next objective →
-            </Link>
-          )}
-        </div>
+      <div className="flex justify-between mt-8">
+        {prevObjective && (
+          <Link
+            href={`/courses/${objective.course.slug}/objectives/${prevObjective.slug}`}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            ← Previous Objective
+          </Link>
+        )}
+        {nextObjective && (
+          <Link
+            href={`/courses/${objective.course.slug}/objectives/${nextObjective.slug}`}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            Next Objective →
+          </Link>
+        )}
       </div>
     </div>
   )
