@@ -7,6 +7,7 @@ interface Objective {
   title: string
   slug: string
   description: string
+  content: string | null
   order: number
   courseId: string
   course: {
@@ -55,10 +56,25 @@ export default async function ObjectivePage({
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{objective.title}</h1>
-        <div 
-          className="prose prose-lg max-w-none [&>h1]:text-4xl [&>h2]:text-3xl [&>h3]:text-2xl [&>h4]:text-xl [&>h5]:text-lg [&>h6]:text-base [&>p]:text-base [&>ul]:list-disc [&>ol]:list-decimal [&>li]:text-base [&>a]:text-blue-600 [&>a:hover]:text-blue-800 [&>img]:max-w-full [&>img]:rounded-lg [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic"
-          dangerouslySetInnerHTML={{ __html: objective.description }}
-        />
+        
+        {/* Display description as a plain text overview */}
+        <p className="text-gray-600 mb-6 text-lg">{objective.description}</p>
+        
+        {/* Display content as rich text if available */}
+        {objective.content && (
+          <div 
+            className="prose prose-lg max-w-none [&>h1]:text-4xl [&>h2]:text-3xl [&>h3]:text-2xl [&>h4]:text-xl [&>h5]:text-lg [&>h6]:text-base [&>p]:text-base [&>ul]:list-disc [&>ol]:list-decimal [&>li]:text-base [&>a]:text-blue-600 [&>a:hover]:text-blue-800 [&>img]:max-w-full [&>img]:rounded-lg [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic"
+            dangerouslySetInnerHTML={{ __html: objective.content }}
+          />
+        )}
+        
+        {/* Fallback to description as rich text if content is not available (for backward compatibility) */}
+        {!objective.content && objective.description && (
+          <div 
+            className="prose prose-lg max-w-none [&>h1]:text-4xl [&>h2]:text-3xl [&>h3]:text-2xl [&>h4]:text-xl [&>h5]:text-lg [&>h6]:text-base [&>p]:text-base [&>ul]:list-disc [&>ol]:list-decimal [&>li]:text-base [&>a]:text-blue-600 [&>a:hover]:text-blue-800 [&>img]:max-w-full [&>img]:rounded-lg [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic"
+            dangerouslySetInnerHTML={{ __html: objective.description }}
+          />
+        )}
       </div>
 
       <div className="mb-8">

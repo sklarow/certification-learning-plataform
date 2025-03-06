@@ -45,7 +45,10 @@ export async function PUT(
       where: { id: objective.id },
       data: {
         title: body.title,
+        // Update description as plain text summary
         description: body.description,
+        // Update content as rich text
+        content: body.content || null,
         order: body.order,
         slug: body.slug,
       },

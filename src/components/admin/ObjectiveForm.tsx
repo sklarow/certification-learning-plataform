@@ -10,6 +10,7 @@ import { useCallback } from "react"
 const objectiveSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
+  content: z.string().optional(),
   order: z.number().min(0, "Order must be a positive number"),
 })
 
@@ -20,6 +21,7 @@ interface ObjectiveFormProps {
     id: string
     title: string
     description: string
+    content?: string | null
     order: number
     slug: string
   }
@@ -41,16 +43,18 @@ export function ObjectiveForm({ objective, courseId }: ObjectiveFormProps) {
       ? {
           title: objective.title,
           description: objective.description,
+          content: objective.content || "",
           order: objective.order,
         }
       : {
           title: "",
           description: "",
+          content: "",
           order: 0,
         },
   })
 
-  const description = watch("description")
+  const content = watch("content")
   const title = watch("title")
 
   const generateSlug = useCallback((title: string) => {
@@ -67,6 +71,7 @@ export function ObjectiveForm({ objective, courseId }: ObjectiveFormProps) {
         ...data,
         slug,
         description: data.description || "",
+        content: data.content || "",
       }
 
       if (objective) {
@@ -128,24 +133,40 @@ export function ObjectiveForm({ objective, courseId }: ObjectiveFormProps) {
           htmlFor="description"
           className="block text-sm font-medium text-gray-700"
         >
-          Description
+          Short Description
+        </label>
+        <input
+          type="text"
+          id="description"
+          {...register("description")}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          placeholder="Enter a brief description for objective listings..."
+        />
+        {errors.description && (
+          <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="content"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Content
         </label>
         <div className="mt-1">
           <RichTextEditor
-            value={description || ""}
+            value={content || ""}
             onChange={(value) => {
-              setValue("description", value, { 
+              setValue("content", value, { 
                 shouldValidate: true,
                 shouldDirty: true,
                 shouldTouch: true 
               })
             }}
-            placeholder="Enter objective description..."
+            placeholder="Enter rich text content for the objective..."
           />
         </div>
-        {errors.description && (
-          <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
-        )}
       </div>
 
       <div>

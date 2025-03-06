@@ -117,6 +117,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 </Link>
               </div>
               <p className="mt-2 text-sm text-gray-500">
+                {/* Display the plain text description here */}
                 {objective.description}
               </p>
             </div>

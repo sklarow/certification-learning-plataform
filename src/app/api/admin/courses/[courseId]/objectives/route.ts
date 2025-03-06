@@ -32,7 +32,10 @@ export async function POST(
     const objective = await prisma.objective.create({
       data: {
         title: body.title,
+        // Store description as plain text summary
         description: body.description,
+        // Store content as rich text
+        content: body.content || null,
         order: body.order,
         slug: body.slug,
         courseId: course.id,
